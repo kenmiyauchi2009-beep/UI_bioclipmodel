@@ -1,0 +1,374 @@
+/* ============================================================
+   style.css — Mālama Map 共通スタイル
+   テーマ：ハワイ自然色（深緑 / 火山黒 / Lehua 赤 / 砂）
+   ============================================================ */
+
+:root {
+  --forest:        #1b4332;   /* 深い森の緑（メイン） */
+  --forest-light:  #2d6a4f;   /* 明るい緑 */
+  --forest-soft:   #95d5b2;   /* 淡い緑 */
+  --volcanic:      #1a1a1a;   /* 火山黒 */
+  --lehua:         #c1272d;   /* Lehua の赤（アクセント） */
+  --lehua-dark:    #8b0000;
+  --sand:          #f5f0e6;   /* 砂色（背景） */
+  --card:          #ffffff;
+  --text:          #20281f;
+  --text-soft:     #5c6b5a;
+  --shadow:        0 4px 14px rgba(27, 67, 50, 0.12);
+  --radius:        14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Hiragino Sans", "Yu Gothic", "Segoe UI", "Helvetica Neue", sans-serif;
+  background: var(--sand);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- ヘッダー / ナビ ---------- */
+.site-header {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%);
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #fff;
+}
+.brand .logo { font-size: 1.5rem; }
+.brand .title { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.02em; }
+.brand .tagline { font-size: 0.72rem; color: var(--forest-soft); }
+
+.main-nav { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.main-nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  transition: background 0.15s ease;
+}
+.main-nav a small { display: block; font-size: 0.65rem; opacity: 0.7; }
+.main-nav a:hover { background: rgba(255, 255, 255, 0.15); }
+.main-nav a.active { background: var(--lehua); }
+.main-nav a.disabled { opacity: 0.45; pointer-events: none; }
+
+/* ---------- レイアウト ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+@media (max-width: 880px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+/* ---------- 地図 ---------- */
+#map {
+  height: calc(100vh - 140px);
+  min-height: 420px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+
+/* 地図の凡例 */
+.legend {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+}
+.legend h3 { font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--forest); }
+.legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; margin: 0.3rem 0; }
+.dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.dot.native   { background: var(--forest-light); }
+.dot.invasive { background: var(--lehua); }
+.dot.rod      { background: #fff; border: 3px solid var(--lehua); }
+
+/* ---------- 最新投稿サイドパネル ---------- */
+.sidebar h2 {
+  font-size: 1rem;
+  color: var(--forest);
+  margin-bottom: 0.6rem;
+  padding-left: 0.2rem;
+}
+.feed { display: flex; flex-direction: column; gap: 0.6rem; max-height: calc(100vh - 320px); overflow-y: auto; padding-right: 4px; }
+.feed-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  box-shadow: var(--shadow);
+  border-left: 5px solid var(--forest-light);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.feed-card:hover { transform: translateX(3px); }
+.feed-card.invasive { border-left-color: var(--lehua); }
+.feed-card .fc-head { display: flex; align-items: center; gap: 0.45rem; }
+.feed-card .fc-emoji { font-size: 1.2rem; }
+.feed-card .fc-name { font-weight: 700; font-size: 0.92rem; }
+.feed-card .fc-sci { font-style: italic; font-size: 0.72rem; color: var(--text-soft); }
+.feed-card .fc-note { font-size: 0.8rem; margin: 0.35rem 0; color: var(--text); }
+.feed-card .fc-meta { font-size: 0.7rem; color: var(--text-soft); display: flex; justify-content: space-between; }
+
+/* ---------- バッジ（保全ステータス） ---------- */
+.badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  color: #fff;
+  white-space: nowrap;
+}
+.badge.endangered { background: var(--lehua-dark); }
+.badge.watch      { background: #d97706; }
+.badge.stable     { background: var(--forest-light); }
+.badge.invasive   { background: var(--volcanic); }
+.badge.rod        { background: var(--lehua); }
+.badge.keystone   { background: #1d4ed8; }
+
+/* ---------- 植物図鑑 ---------- */
+.plants-page { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
+.page-intro { margin-bottom: 1rem; }
+.page-intro h1 { color: var(--forest); font-size: 1.5rem; }
+.page-intro p { color: var(--text-soft); font-size: 0.9rem; }
+
+.filters { display: flex; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap; }
+.filter-btn {
+  border: 2px solid var(--forest-light);
+  background: transparent;
+  color: var(--forest);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filter-btn:hover { background: var(--forest-soft); }
+.filter-btn.active { background: var(--forest); color: #fff; border-color: var(--forest); }
+
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.1rem;
+}
+
+.plant-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.plant-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(27,67,50,0.18); }
+
+.plant-photo { position: relative; height: 180px; overflow: hidden; }
+.plant-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* 写真が読めなかった時の代用（色＋絵文字） */
+.plant-photo .photo-fallback {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3.5rem;
+  color: #fff;
+}
+.plant-photo .cat-tag {
+  position: absolute; top: 8px; left: 8px;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 0.15rem 0.6rem; border-radius: 999px; color: #fff;
+}
+.cat-tag.native   { background: var(--forest-light); }
+.cat-tag.invasive { background: var(--lehua); }
+
+.plant-body { padding: 0.9rem 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+.plant-body .haw-name { font-size: 1.15rem; font-weight: 700; color: var(--forest); }
+.plant-body .sci-name { font-style: italic; font-size: 0.8rem; color: var(--text-soft); }
+.plant-body .eng-name { font-size: 0.78rem; color: var(--text-soft); }
+.plant-body .desc { font-size: 0.83rem; margin-top: 0.2rem; }
+.plant-body .cultural {
+  font-size: 0.8rem;
+  background: var(--sand);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  margin-top: 0.3rem;
+}
+.plant-body .cultural strong { color: var(--lehua); }
+.tag-row { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.2rem; }
+
+/* ---------- 投稿フォーム ---------- */
+.report-page { max-width: 680px; margin: 0 auto; padding: 1.2rem; }
+.report-form { display: flex; flex-direction: column; gap: 1.3rem; }
+
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
+.field-label { font-weight: 700; color: var(--forest); font-size: 0.95rem; }
+.hint { font-size: 0.78rem; color: var(--text-soft); }
+
+.text-input {
+  font-family: inherit;
+  font-size: 0.92rem;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid #d9e2d6;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+}
+.text-input:focus { outline: none; border-color: var(--forest-light); }
+select.text-input { cursor: pointer; }
+
+/* 写真アップローダー */
+.photo-uploader {
+  border: 2px dashed var(--forest-light);
+  border-radius: var(--radius);
+  background: #fff;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.15s ease;
+}
+.photo-uploader:hover { background: #f3f8f1; }
+.photo-placeholder {
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  color: var(--text-soft); font-size: 0.9rem; text-align: center; padding: 1rem;
+}
+.photo-placeholder .cam-icon { font-size: 2.4rem; }
+.photo-placeholder small { font-size: 0.72rem; opacity: 0.7; }
+.photo-preview { width: 100%; max-height: 340px; object-fit: cover; display: block; }
+
+.link-btn {
+  align-self: flex-start;
+  background: none; border: none;
+  color: var(--lehua); font-size: 0.8rem; cursor: pointer; padding: 0;
+  text-decoration: underline;
+}
+
+/* 地点選択マップ */
+.pick-map {
+  height: 300px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+.loc-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.ghost-btn {
+  border: 2px solid var(--forest-light);
+  background: #fff; color: var(--forest);
+  padding: 0.45rem 0.9rem; border-radius: 999px;
+  font-size: 0.85rem; cursor: pointer; transition: all 0.15s ease;
+}
+.ghost-btn:hover { background: var(--forest-soft); }
+.coord-label { font-size: 0.82rem; color: var(--text-soft); }
+.coord-label.set { color: var(--forest); font-weight: 700; }
+
+.form-error {
+  background: #fde8e8; color: var(--lehua-dark);
+  border: 1px solid var(--lehua); border-radius: 10px;
+  padding: 0.6rem 0.8rem; font-size: 0.85rem;
+}
+
+.submit-btn {
+  background: var(--lehua); color: #fff;
+  border: none; border-radius: 999px;
+  padding: 0.8rem; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background 0.15s ease;
+}
+.submit-btn:hover { background: var(--lehua-dark); }
+
+/* ポップアップ内の写真 */
+.popup-photo {
+  width: 100%; max-width: 220px; border-radius: 8px;
+  margin: 0.4rem 0; display: block;
+}
+/* フィードカードの写真 */
+.feed-card .fc-photo {
+  width: 100%; height: 110px; object-fit: cover;
+  border-radius: 8px; margin: 0.4rem 0;
+}
+
+/* ---------- BioCLIP AI 種提案パネル ---------- */
+.ai-result {
+  margin-top: 0.7rem;
+  background: #f3f8f1;
+  border: 1px solid #d4e6d0;
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  font-size: 0.85rem;
+}
+.ai-loading, .ai-error { color: var(--text-soft); font-size: 0.88rem; }
+.ai-error { color: var(--lehua-dark); }
+.ai-head { font-weight: 700; color: var(--forest); margin-bottom: 0.5rem; }
+
+.ai-verdict {
+  border-radius: 10px; padding: 0.55rem 0.7rem; margin-bottom: 0.5rem;
+  font-size: 0.9rem; line-height: 1.5; color: #fff;
+}
+.ai-verdict.native   { background: var(--forest-light); }
+.ai-verdict.invasive { background: var(--lehua); }
+.ai-verdict.unknown  { background: #6b7280; }
+.ai-verdict .ai-score { display: block; font-size: 0.74rem; opacity: 0.9; margin-top: 0.15rem; }
+
+.ai-apply {
+  background: var(--forest); color: #fff; border: none;
+  border-radius: 999px; padding: 0.4rem 1rem; font-size: 0.82rem;
+  cursor: pointer; margin-bottom: 0.6rem;
+}
+.ai-apply:disabled { background: var(--forest-light); cursor: default; }
+
+.ai-lownote {
+  background: #fff7ed; color: #9a3412; border-radius: 8px;
+  padding: 0.4rem 0.6rem; font-size: 0.78rem; margin-bottom: 0.5rem;
+}
+
+.ai-list-title { font-size: 0.76rem; color: var(--text-soft); margin: 0.4rem 0 0.3rem; }
+.ai-row {
+  display: grid; grid-template-columns: 1fr 80px 38px;
+  align-items: center; gap: 0.5rem; margin: 0.25rem 0; font-size: 0.8rem;
+}
+.ai-row-name i { color: var(--forest); }
+.ai-bar { background: #e3ece0; border-radius: 999px; height: 8px; overflow: hidden; }
+.ai-bar span { display: block; height: 100%; background: var(--forest-light); }
+.ai-pct { text-align: right; color: var(--text-soft); font-size: 0.74rem; }
+.ai-tag { font-size: 0.66rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; color: #fff; }
+.ai-tag.native { background: var(--forest-light); }
+.ai-tag.invasive { background: var(--lehua); }
+.ai-foot { font-size: 0.7rem; color: var(--text-soft); margin-top: 0.5rem; text-align: right; }
+
+/* ---------- フッター ---------- */
+.site-footer {
+  text-align: center;
+  padding: 1.2rem;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+/* Leaflet ポップアップ内 */
+.popup-title { font-weight: 700; color: var(--forest); font-size: 1rem; }
+.popup-sci { font-style: italic; font-size: 0.75rem; color: var(--text-soft); }
+.popup-note { font-size: 0.82rem; margin: 0.4rem 0; }
+.popup-meta { font-size: 0.7rem; color: var(--text-soft); }

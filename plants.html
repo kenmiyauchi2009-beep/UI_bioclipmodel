@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>植物図鑑 Plants — Mālama Map</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 共通ヘッダー / ナビ -->
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="logo">🌺</span>
+      <span>
+        <span class="title">Mālama Map</span>
+        <span class="tagline">ハワイ在来植物を守る市民マップ</span>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">地図<small>Map</small></a>
+      <a href="plants.html" class="active">植物図鑑<small>Plants</small></a>
+      <a href="report.html">投稿<small>Report</small></a>
+      <a href="#" class="disabled">統計<small>Stats</small></a>
+      <a href="#" class="disabled">マイページ<small>Profile</small></a>
+    </nav>
+  </header>
+
+  <main class="plants-page">
+    <div class="page-intro">
+      <h1>植物図鑑 Plants</h1>
+      <p>ハワイの在来種と、森を脅かす外来種。ハワイ語名・保全状況・文化的な背景を知ろう。</p>
+    </div>
+
+    <!-- フィルタ（plants.js が動かす） -->
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">すべて All</button>
+      <button class="filter-btn" data-filter="native">在来種 Native</button>
+      <button class="filter-btn" data-filter="invasive">外来種 Invasive</button>
+    </div>
+
+    <!-- カードがここに入る -->
+    <div class="plant-grid" id="plantGrid"></div>
+  </main>
+
+  <footer class="site-footer">
+    Mālama Map — 市民科学でハワイの森を守る · データはサンプル（フェーズ1 デモ）
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="plants.js"></script>
+</body>
+</html>

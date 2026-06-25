@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mālama Map — ハワイ在来植物の市民マップ</title>
+
+  <!-- Leaflet（地図ライブラリ）CDN・APIキー不要 -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 共通ヘッダー / ナビ -->
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="logo">🌺</span>
+      <span>
+        <span class="title">Mālama Map</span>
+        <span class="tagline">ハワイ在来植物を守る市民マップ</span>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html" class="active">地図<small>Map</small></a>
+      <a href="plants.html">植物図鑑<small>Plants</small></a>
+      <a href="report.html">投稿<small>Report</small></a>
+      <a href="#" class="disabled">統計<small>Stats</small></a>
+      <a href="#" class="disabled">マイページ<small>Profile</small></a>
+    </nav>
+  </header>
+
+  <!-- メイン：左に地図 / 右に最新投稿 -->
+  <main class="layout">
+    <section>
+      <div id="map"></div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="legend">
+        <h3>凡例 Legend</h3>
+        <div class="legend-item"><span class="dot native"></span> 在来種 Native</div>
+        <div class="legend-item"><span class="dot invasive"></span> 外来種 Invasive</div>
+        <div class="legend-item"><span class="dot rod"></span> ROD 要観察（ʻŌhiʻa）</div>
+      </div>
+
+      <h2>最新の目撃 Recent Sightings</h2>
+      <div class="feed" id="feed"><!-- map.js が投稿カードを差し込む --></div>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    Mālama Map — 市民科学でハワイの森を守る · データはサンプル（フェーズ1 デモ）
+  </footer>
+
+  <!-- Leaflet 本体 → データ → 地図ロジック の順で読み込む -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="data.js"></script>
+  <script src="map.js"></script>
+</body>
+</html>
