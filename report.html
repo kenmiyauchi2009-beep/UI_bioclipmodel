@@ -12,6 +12,8 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
+  <!-- Cropper.js（写真クロップ用） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -59,6 +61,7 @@
           </div>
           <img id="photoPreview" class="photo-preview" alt="プレビュー" hidden />
         </div>
+        <button type="button" id="cropBtn" class="ghost-btn crop-btn" hidden>✂️ 範囲を選ぶ（複数の植物があるとき）</button>
         <button type="button" id="clearPhoto" class="link-btn" hidden>写真を消す</button>
 
         <!-- AI 種提案（BioCLIP）の結果がここに出る -->
@@ -68,7 +71,9 @@
       <!-- 2. 地点を選ぶ -->
       <div class="field">
         <label class="field-label">② 地点 Location</label>
-        <p class="hint">地図をタップしてピンを置く（ドラッグで微調整できます）</p>
+        <p class="hint">写真に位置情報があれば自動で候補を表示します。地図をタップ／ピンをドラッグで微調整できます。</p>
+        <!-- 写真のEXIFから推定した位置の「ここですか？」サジェスト -->
+        <div id="exifSuggest" class="exif-suggest" hidden></div>
         <div id="pickMap" class="pick-map"></div>
         <div class="loc-row">
           <button type="button" id="useGps" class="ghost-btn">📍 現在地を使う</button>
@@ -80,10 +85,10 @@
       <div class="field">
         <label class="field-label" for="plantSelect">③ 植物名 Plant</label>
         <select id="plantSelect" class="text-input" required>
-          <option value="">— 選択してください —</option>
-          <!-- report.js が PLANTS から option を入れる -->
+          <option value="" disabled selected hidden>— 写真を撮ると候補が出ます —</option>
+          <!-- report.js が BioCLIP の候補を入れる -->
         </select>
-        <p class="hint">分からない場合は「未確認」を選んでコミュニティに判定してもらえます。</p>
+        <p class="hint">植物名は <strong>BioCLIP の候補</strong>から選びます。上の候補リストをタップしても選べます。分からなければ「未確認」でOK。</p>
       </div>
 
       <!-- 4. メモ -->
@@ -104,8 +109,7 @@
           type="text"
           id="reporterInput"
           class="text-input"
-          placeholder="例：APIS Student"
-          value="APIS Student"
+          placeholder="お名前（任意）"
         />
       </div>
 
@@ -124,6 +128,10 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
+  <!-- EXIF（写真の位置情報）読み取りライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+  <!-- Cropper.js（写真クロップ） -->
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
   <script src="data.js"></script>
   <script src="report.js"></script>
 </body>

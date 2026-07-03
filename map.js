@@ -6,14 +6,34 @@
    3. 最新の目撃を右サイドのフィードに表示
    ============================================================ */
 
-/* ---------- 1. 地図の初期化（ハワイ諸島全体） ---------- */
-const map = L.map("map").setView([20.7, -157.0], 7);
+/* ---------- 1. 地図の初期化（ハワイ諸島周辺に限定） ---------- */
+// ISLANDS … 島々の範囲（初期表示の基準）
+// PAN     … パンできる範囲。島の縁を画面中央まで寄せられるよう余白を持たせる。
+const ISLANDS_BOUNDS = L.latLngBounds([18.4, -160.6], [22.6, -154.5]);
+const PAN_BOUNDS = L.latLngBounds([13.0, -166.0], [27.5, -149.0]);
+
+const map = L.map("map", {
+  maxBounds: PAN_BOUNDS,         // この範囲外へはドラッグできない（余白込み）
+  maxBoundsViscosity: 1.0,       // 端で“跳ね返す”強さ（1=完全固定）
+  minZoom: 5,                    // 全島を一度に収められる余裕を持たせる
+  maxZoom: 18
+});
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 18,
+  // bounds は付けない → 周辺の海タイルも読み込まれ、灰色の余白が出ない
   attribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
+
+// 全島が余白付きで収まるように表示（島が端で切れないよう padding）
+function fitHawaii() {
+  map.invalidateSize();                              // コンテナの実サイズを再取得
+  map.fitBounds(ISLANDS_BOUNDS, { padding: [30, 30] });
+}
+fitHawaii();
+// レイアウト確定後にもう一度（初期表示で島が出ない問題の保険）
+window.addEventListener("load", fitHawaii);
+setTimeout(fitHawaii, 300);
 
 /* 未確認（plantId が "unknown" 等で植物が見つからない）投稿の代用データ */
 const UNKNOWN_PLANT = {
@@ -53,10 +73,18 @@ function popupHtml(plant, sighting) {
   const photo = sighting.photoUrl
     ? '<img class="popup-photo" src="' + sighting.photoUrl + '" alt="投稿写真">'
     : "";
+  // BioCLIP が出した学名があればそれを見出しに使う
+  const title = sighting.speciesName || plant.hawaiianName;
+  const subtitle = sighting.speciesName
+    ? (getPlantById(sighting.plantId) ? plant.hawaiianName : "BioCLIP 判定")
+    : plant.scientificName;
+  const aiTag = (sighting.aiScore != null)
+    ? ' <span class="badge keystone">AI ' + Math.round(sighting.aiScore * 100) + "%</span>"
+    : "";
   return (
     '<div class="popup">' +
-      '<div class="popup-title">' + plant.emoji + " " + plant.hawaiianName + "</div>" +
-      '<div class="popup-sci">' + plant.scientificName + "</div>" +
+      '<div class="popup-title">' + plant.emoji + " " + title + "</div>" +
+      '<div class="popup-sci">' + subtitle + aiTag + "</div>" +
       '<div style="margin:4px 0;">' + rodTag +
         '<span class="badge ' + plant.status + '">' + plant.statusLabel + "</span>" +
       "</div>" +
@@ -101,12 +129,18 @@ function renderFeed() {
       ? '<img class="fc-photo" src="' + s.photoUrl + '" alt="投稿写真">'
       : "";
 
+    // BioCLIP の学名があれば見出しに使う
+    const fcName = s.speciesName || plant.hawaiianName;
+    const fcSub = s.speciesName
+      ? (getPlantById(s.plantId) ? plant.hawaiianName : "BioCLIP 判定")
+      : plant.scientificName;
+
     card.innerHTML =
       '<div class="fc-head">' +
         '<span class="fc-emoji">' + plant.emoji + "</span>" +
         "<span>" +
-          '<span class="fc-name">' + plant.hawaiianName + "</span><br>" +
-          '<span class="fc-sci">' + plant.scientificName + "</span>" +
+          '<span class="fc-name">' + fcName + "</span><br>" +
+          '<span class="fc-sci">' + fcSub + "</span>" +
         "</span>" +
       "</div>" +
       photo +

@@ -92,6 +92,9 @@ body {
   z-index: 1;
 }
 
+/* タイルが無い領域（ズームアウト時の余白）を灰色でなく海の青に */
+.leaflet-container { background: #a5cee0; }
+
 /* 地図の凡例 */
 .legend {
   background: var(--card);
@@ -187,6 +190,94 @@ body {
 }
 .plant-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(27,67,50,0.18); }
 
+/* 未発見（Pokédex のロック状態） */
+.plant-card.locked { opacity: 0.72; }
+.plant-card.locked .plant-photo img,
+.plant-card.locked .plant-photo .photo-fallback { filter: grayscale(0.85); }
+.plant-card.locked:hover { opacity: 1; }
+.find-hint {
+  font-size: 0.78rem; color: var(--forest); background: #eef6ea;
+  border-radius: 8px; padding: 0.4rem 0.6rem; margin-top: 0.3rem;
+}
+
+/* 発見状態タグ（写真右上） */
+.dex-state {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 0.15rem 0.55rem; border-radius: 999px; color: #fff;
+}
+.dex-state.found  { background: var(--forest); }
+.dex-state.locked { background: rgba(26,26,26,0.6); }
+.cat-tag.community { background: #6b7280; }
+
+/* 発見数カウンター（在来/外来 別の小図鑑バー） */
+.dex-progress {
+  margin-top: 0.6rem;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  box-shadow: var(--shadow);
+  max-width: 420px;
+}
+.dex-bar-row { display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.4rem 0; font-size: 0.85rem; }
+.dex-bar-label { flex-shrink: 0; width: 130px; padding-top: 2px; }
+.dex-bar-label strong { color: var(--forest); }
+.dex-bar-track { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.dex-bar-pct { align-self: flex-end; font-size: 0.78rem; font-weight: 700; color: var(--forest); }
+.dex-bar { height: 10px; background: #e3ece0; border-radius: 999px; overflow: hidden; }
+.dex-bar-fill { display: block; height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+.dex-bar-fill.native { background: var(--forest-light); }
+.dex-bar-fill.invasive { background: var(--lehua); }
+.dex-community { font-size: 0.82rem; color: var(--text-soft); margin-top: 0.35rem; }
+.dex-community strong { color: var(--forest); }
+
+/* カードはタップできる */
+.plant-card { cursor: pointer; }
+
+/* ---------- 詳細モーダル ---------- */
+.detail-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(20, 30, 20, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; animation: fadeIn 0.18s ease; overflow-y: auto;
+}
+.detail-card {
+  background: var(--card); border-radius: 16px;
+  max-width: 460px; width: 100%; max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); position: relative;
+  animation: popIn 0.35s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+.detail-close {
+  position: absolute; top: 8px; right: 10px; z-index: 2;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: none; background: rgba(0, 0, 0, 0.45); color: #fff;
+  font-size: 1.3rem; line-height: 1; cursor: pointer;
+}
+.detail-photo { width: 100%; height: 220px; overflow: hidden; border-radius: 16px 16px 0 0; background: var(--sand); }
+.detail-photo img { width: 100%; height: 100%; object-fit: cover; }
+.detail-emoji { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #fff; }
+.detail-body { padding: 1rem 1.1rem 1.2rem; }
+.detail-name { font-size: 1.35rem; font-weight: 700; color: var(--forest); }
+.detail-sci { font-style: italic; font-size: 0.85rem; color: var(--text-soft); }
+.detail-eng { font-size: 0.8rem; color: var(--text-soft); }
+.detail-badges { margin: 0.5rem 0; display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.detail-desc { font-size: 0.9rem; margin: 0.5rem 0; }
+.detail-cultural { font-size: 0.86rem; background: var(--sand); border-radius: 8px; padding: 0.55rem 0.7rem; }
+.detail-cultural strong { color: var(--lehua); }
+.detail-sightings { margin-top: 0.9rem; }
+.detail-sightings h4 { font-size: 0.95rem; color: var(--forest); margin-bottom: 0.4rem; }
+.detail-sightings h4 span { font-weight: 400; font-size: 0.78rem; color: var(--text-soft); }
+.detail-map { height: 200px; border-radius: 10px; margin-bottom: 0.5rem; z-index: 1; }
+.detail-empty { font-size: 0.85rem; color: var(--text-soft); background: var(--sand); border-radius: 8px; padding: 0.7rem; text-align: center; }
+.detail-sight-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.detail-sight-list li {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.5rem;
+  font-size: 0.8rem; background: #f6f9f4; border-radius: 8px; padding: 0.4rem 0.55rem;
+}
+.detail-sight-list .ds-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+.detail-sight-list .ds-note { color: var(--text); }
+.detail-sight-list .ds-meta { color: var(--text-soft); font-size: 0.72rem; white-space: nowrap; }
+
 .plant-photo { position: relative; height: 180px; overflow: hidden; }
 .plant-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* 写真が読めなかった時の代用（色＋絵文字） */
@@ -196,11 +287,13 @@ body {
   font-size: 3.5rem;
   color: #fff;
 }
-.plant-photo .cat-tag {
-  position: absolute; top: 8px; left: 8px;
+/* カテゴリタグ（写真の上でも詳細モーダル内でも白文字のピル） */
+.cat-tag {
+  display: inline-block;
   font-size: 0.68rem; font-weight: 700;
   padding: 0.15rem 0.6rem; border-radius: 999px; color: #fff;
 }
+.plant-photo .cat-tag { position: absolute; top: 8px; left: 8px; }
 .cat-tag.native   { background: var(--forest-light); }
 .cat-tag.invasive { background: var(--lehua); }
 
@@ -267,6 +360,41 @@ select.text-input { cursor: pointer; }
   color: var(--lehua); font-size: 0.8rem; cursor: pointer; padding: 0;
   text-decoration: underline;
 }
+
+/* クロップ */
+.crop-btn { font-size: 0.82rem; padding: 0.4rem 0.85rem; align-self: flex-start; margin-top: 0.2rem; }
+.crop-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(20, 30, 20, 0.7);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.crop-modal {
+  background: var(--card); border-radius: 14px; padding: 0.9rem;
+  max-width: 540px; width: 100%; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+.crop-hint { font-size: 0.85rem; margin-bottom: 0.6rem; line-height: 1.5; }
+.crop-hint strong { color: var(--lehua); }
+.crop-stage { max-height: 60vh; overflow: hidden; background: #000; border-radius: 8px; }
+.crop-stage img { max-width: 100%; display: block; }
+.crop-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+.crop-actions .ghost-btn { flex: 1; }
+.crop-actions .crop-confirm { flex: 2; }
+
+/* EXIF「ここですか？」サジェスト */
+.exif-suggest {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.7rem;
+  background: #eaf5e6; border: 1px solid var(--forest-light);
+  border-radius: 10px; padding: 0.55rem 0.75rem; margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+.exif-suggest.note { background: #fff7ed; border-color: #d97706; color: #9a3412; }
+.exif-suggest .es-text { line-height: 1.4; }
+.exif-suggest .es-text small { color: var(--text-soft); }
+.exif-suggest .es-ok {
+  flex-shrink: 0; background: var(--forest); color: #fff; border: none;
+  border-radius: 999px; padding: 0.4rem 0.9rem; font-size: 0.8rem; cursor: pointer;
+}
+.exif-suggest .es-ok:hover { background: var(--forest-light); }
 
 /* 地点選択マップ */
 .pick-map {
@@ -350,6 +478,13 @@ select.text-input { cursor: pointer; }
   display: grid; grid-template-columns: 1fr 80px 38px;
   align-items: center; gap: 0.5rem; margin: 0.25rem 0; font-size: 0.8rem;
 }
+.ai-row.selectable {
+  cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 8px;
+  border: 1px solid transparent; transition: background 0.12s ease;
+}
+.ai-row.selectable:hover { background: #e8f1e5; }
+.ai-row.selectable.selected { background: #dff0d8; border-color: var(--forest-light); }
+.ai-row.unknown-row { grid-template-columns: 1fr; color: var(--text-soft); }
 .ai-row-name i { color: var(--forest); }
 .ai-bar { background: #e3ece0; border-radius: 999px; height: 8px; overflow: hidden; }
 .ai-bar span { display: block; height: 100%; background: var(--forest-light); }
@@ -358,6 +493,61 @@ select.text-input { cursor: pointer; }
 .ai-tag.native { background: var(--forest-light); }
 .ai-tag.invasive { background: var(--lehua); }
 .ai-foot { font-size: 0.7rem; color: var(--text-soft); margin-top: 0.5rem; text-align: right; }
+
+/* ---------- 発見演出（じゃじゃーん）ポップアップ ---------- */
+.discovery-overlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(20, 30, 20, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem; animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.discovery-card {
+  background: var(--card); border-radius: 18px;
+  padding: 1.4rem 1.3rem 1.2rem; max-width: 340px; width: 100%;
+  text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  animation: popIn 0.45s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+@keyframes popIn {
+  0%   { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.disc-sparkles {
+  font-size: 1.6rem; letter-spacing: 0.3rem;
+  animation: sparkle 1.2s ease-in-out infinite;
+}
+@keyframes sparkle {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.12); }
+}
+
+.disc-title { font-size: 1.15rem; font-weight: 800; color: var(--lehua); margin: 0.2rem 0 0.7rem; }
+.disc-photo {
+  width: 100%; height: 170px; border-radius: 12px; overflow: hidden;
+  margin-bottom: 0.7rem; background: var(--sand);
+}
+.disc-photo img { width: 100%; height: 100%; object-fit: cover; }
+.disc-emoji {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 3.5rem; color: #fff;
+}
+.disc-name { font-size: 1.2rem; font-weight: 700; color: var(--forest); }
+.disc-sci { font-style: italic; font-size: 0.82rem; color: var(--text-soft); margin-bottom: 0.4rem; }
+.disc-badges { margin-bottom: 0.6rem; }
+.disc-progress {
+  font-size: 0.95rem; background: #eef6ea; border-radius: 10px;
+  padding: 0.5rem; margin-bottom: 0.9rem;
+}
+.disc-progress strong { color: var(--forest); }
+.disc-actions { display: flex; gap: 0.5rem; }
+.disc-btn {
+  flex: 1; border: 2px solid var(--forest-light); background: #fff; color: var(--forest);
+  border-radius: 999px; padding: 0.55rem; font-size: 0.85rem; cursor: pointer; font-weight: 700;
+}
+.disc-btn.primary { background: var(--lehua); color: #fff; border-color: var(--lehua); }
+.disc-btn:hover { filter: brightness(0.95); }
 
 /* ---------- フッター ---------- */
 .site-footer {

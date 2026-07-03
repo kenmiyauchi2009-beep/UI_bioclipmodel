@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>植物図鑑 Plants — Mālama Map</title>
+
+  <!-- Leaflet（詳細モーダルのミニ地図用） -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -28,12 +36,15 @@
   <main class="plants-page">
     <div class="page-intro">
       <h1>植物図鑑 Plants</h1>
-      <p>ハワイの在来種と、森を脅かす外来種。ハワイ語名・保全状況・文化的な背景を知ろう。</p>
+      <p>ハワイの在来種と、森を脅かす外来種。見つけて投稿すると図鑑が埋まっていきます。</p>
+      <div class="dex-progress" id="dexProgress"></div>
     </div>
 
     <!-- フィルタ（plants.js が動かす） -->
     <div class="filters" id="filters">
       <button class="filter-btn active" data-filter="all">すべて All</button>
+      <button class="filter-btn" data-filter="discovered">🔓 見つかった</button>
+      <button class="filter-btn" data-filter="undiscovered">🔒 未発見</button>
       <button class="filter-btn" data-filter="native">在来種 Native</button>
       <button class="filter-btn" data-filter="invasive">外来種 Invasive</button>
     </div>
@@ -46,6 +57,11 @@
     Mālama Map — 市民科学でハワイの森を守る · データはサンプル（フェーズ1 デモ）
   </footer>
 
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
   <script src="data.js"></script>
   <script src="plants.js"></script>
 </body>
