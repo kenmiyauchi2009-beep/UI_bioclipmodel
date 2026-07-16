@@ -312,7 +312,7 @@ function closeCropModal() {
      Step1 BioCLIP で予測 → Step2 ハワイ種リストと照合
      → Step3 確信度が低ければ「未確認」でコミュニティ判定へ
    ============================================================ */
-const API_BASE = "http://163.43.183.200:8000";
+const API_BASE = "https://malama-map.com";
 const aiResult = document.getElementById("aiResult");
 
 // 予測の学名（"Metrosideros polymorpha"）を PLANTS と照合
