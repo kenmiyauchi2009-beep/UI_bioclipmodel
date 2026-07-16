@@ -305,14 +305,14 @@ function closeCropModal() {
 /* ============================================================
    BioCLIP AI 種提案（フェーズ3）
    ------------------------------------------------------------
-   ローカルで動く BioCLIP API（http://localhost:8000）に写真を送り、
+   BioCLIP API（http://163.43.183.200:8000）に写真を送り、
    返ってきた種候補を data.js の PLANTS と照合して
    「在来種 / 外来種 / 未確認」を提案する。
    ※ CLAUDE.md の3ステップ設計そのもの：
      Step1 BioCLIP で予測 → Step2 ハワイ種リストと照合
      → Step3 確信度が低ければ「未確認」でコミュニティ判定へ
    ============================================================ */
-const API_BASE = "http://localhost:8000";
+const API_BASE = "http://163.43.183.200:8000";
 const aiResult = document.getElementById("aiResult");
 
 // 予測の学名（"Metrosideros polymorpha"）を PLANTS と照合
