@@ -20,12 +20,12 @@ const plantSelect = document.getElementById("plantSelect");
 // 「未確認」= コミュニティ判定に回す
 const unknownOpt = document.createElement("option");
 unknownOpt.value = "unknown";
-unknownOpt.textContent = "❓ 未確認（あとでみんなで判定）";
+unknownOpt.textContent = "未確認（あとでみんなで判定）";
 plantSelect.appendChild(unknownOpt);
 
 // BioCLIP 候補グループ（最初は空。解析後に埋める）
 const aiGroup = document.createElement("optgroup");
-aiGroup.label = "🧠 BioCLIP 候補";
+aiGroup.label = "BioCLIP 候補";
 aiGroup.hidden = true;
 plantSelect.insertBefore(aiGroup, unknownOpt); // プレースホルダの直後・未確認の前
 
@@ -150,7 +150,7 @@ async function readExifLocation(file) {
 
   if (!ISLANDS_BOUNDS.contains([lat, lng])) {
     // ハワイ外の写真 → 手動選択を促す
-    showExifNote("📷 写真の位置がハワイ範囲外でした。地図で選んでください。");
+    showExifNote("写真の位置がハワイ範囲外でした。地図で選んでください。");
     return;
   }
 
@@ -164,9 +164,9 @@ function showExifSuggest() {
   exifSuggest.className = "exif-suggest";
   exifSuggest.hidden = false;
   exifSuggest.innerHTML =
-    '<div class="es-text">📷 写真の場所を検出しました。<strong>ここですか？</strong>' +
+    '<div class="es-text">写真の場所を検出しました。<strong>ここですか？</strong>' +
     "<br><small>違う場合は地図をタップ、またはピンをドラッグして調整できます。</small></div>" +
-    '<button type="button" class="es-ok">✓ ここでOK</button>';
+    '<button type="button" class="es-ok">ここでOK</button>';
   exifSuggest.querySelector(".es-ok").addEventListener("click", hideExifSuggest);
 }
 
@@ -264,7 +264,7 @@ function openCropModal(src) {
   overlay.className = "crop-overlay";
   overlay.innerHTML =
     '<div class="crop-modal">' +
-      '<div class="crop-hint">✂️ 判定したい<strong>1株まるごと</strong>を囲んでください。</div>' +
+      '<div class="crop-hint">判定したい<strong>1株まるごと</strong>を囲んでください。</div>' +
       '<div class="crop-stage"><img id="cropImg" src="' + src + '" alt="クロップ対象"></div>' +
       '<div class="crop-actions">' +
         '<button type="button" class="ghost-btn" id="cropCancel">キャンセル</button>' +
@@ -333,7 +333,7 @@ function matchPlant(sciName) {
 
 async function classifyWithBioCLIP(blob) {
   aiResult.hidden = false;
-  aiResult.innerHTML = '<div class="ai-loading">🧠 BioCLIP が解析中…</div>';
+  aiResult.innerHTML = '<div class="ai-loading">BioCLIP が解析中…</div>';
 
   try {
     const fd = new FormData();
@@ -392,7 +392,7 @@ function renderAiResult(data) {
   } else {
     verdictHtml =
       '<div class="ai-verdict unknown">' +
-        "❓ AI判定：図鑑リストにない種の可能性（" + top.name + "）" +
+        "AI判定：図鑑リストにない種の可能性（" + top.name + "）" +
         '<span class="ai-score">下から候補を選ぶか、未確認で投稿できます</span>' +
       "</div>";
   }
@@ -423,11 +423,11 @@ function renderAiResult(data) {
   // 「未確認」もこの場で選べるように
   listHtml +=
     '<div class="ai-row selectable unknown-row" data-sp="unknown">' +
-      '<div class="ai-row-name">❓ どれでもない／未確認にする</div>' +
+      '<div class="ai-row-name">どれでもない／未確認にする</div>' +
     "</div>";
 
   aiResult.innerHTML =
-    '<div class="ai-head">🧠 BioCLIP 種提案</div>' +
+    '<div class="ai-head">BioCLIP 種提案</div>' +
     verdictHtml + lowNote + listHtml +
     '<div class="ai-foot">BioCLIP 2.5（ローカルGPUで推論）</div>';
 
@@ -515,7 +515,7 @@ form.addEventListener("submit", function (e) {
   if (isNewDiscovery) {
     showDiscoveryPopup(plantId, speciesName, photoDataUrl, discoveredBefore);
   } else {
-    alert("投稿しました！地図に反映されます 🌺");
+    alert("投稿しました！地図に反映されます");
     window.location.href = "index.html";
   }
 });
@@ -564,7 +564,7 @@ function showDiscoveryPopup(plantId, speciesName, photoUrl, before) {
     : "コミュニティ発見 <strong>" + (communityFound + 1) + "</strong> 種目！";
 
   // 表示内容
-  const name = plant ? plant.emoji + " " + plant.hawaiianName : "🌱 " + speciesName;
+  const name = plant ? plant.hawaiianName : speciesName;
   const sci = plant ? plant.scientificName : speciesName;
   const badge = plant
     ? '<span class="badge ' + plant.status + '">' +
@@ -582,7 +582,7 @@ function showDiscoveryPopup(plantId, speciesName, photoUrl, before) {
   overlay.className = "discovery-overlay";
   overlay.innerHTML =
     '<div class="discovery-card">' +
-      '<div class="disc-sparkles">✨🎉✨</div>' +
+      '<div class="disc-sparkles">❦</div>' +
       '<div class="disc-title">じゃじゃーん！新種発見</div>' +
       '<div class="disc-photo">' + photoHtml + "</div>" +
       '<div class="disc-name">' + name + "</div>" +

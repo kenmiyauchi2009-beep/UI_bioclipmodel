@@ -14,13 +14,18 @@
   />
   <!-- Cropper.js（写真クロップ用） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <!-- 図鑑ノート風の見出しフォント（セリフ体 Fraunces） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- 共通ヘッダー / ナビ -->
   <header class="site-header">
     <a class="brand" href="index.html">
-      <span class="logo">🌺</span>
+      <img class="logo" src="favicon.svg" alt="Mālama Map ロゴ" width="30" height="30" />
       <span>
         <span class="title">Mālama Map</span>
         <span class="tagline">ハワイ在来植物を守る市民マップ</span>
@@ -55,13 +60,13 @@
             hidden
           />
           <div class="photo-placeholder" id="photoPlaceholder">
-            <span class="cam-icon">📷</span>
+            <span class="cam-icon" aria-hidden="true">＋</span>
             <span>タップして写真を撮る / 選ぶ</span>
             <small>Take or choose a photo</small>
           </div>
           <img id="photoPreview" class="photo-preview" alt="プレビュー" hidden />
         </div>
-        <button type="button" id="cropBtn" class="ghost-btn crop-btn" hidden>✂️ 範囲を選ぶ（複数の植物があるとき）</button>
+        <button type="button" id="cropBtn" class="ghost-btn crop-btn" hidden>範囲を選ぶ（複数の植物があるとき）</button>
         <button type="button" id="clearPhoto" class="link-btn" hidden>写真を消す</button>
 
         <!-- AI 種提案（BioCLIP）の結果がここに出る -->
@@ -76,7 +81,7 @@
         <div id="exifSuggest" class="exif-suggest" hidden></div>
         <div id="pickMap" class="pick-map"></div>
         <div class="loc-row">
-          <button type="button" id="useGps" class="ghost-btn">📍 現在地を使う</button>
+          <button type="button" id="useGps" class="ghost-btn">現在地を使う</button>
           <span id="coordLabel" class="coord-label">未選択</span>
         </div>
       </div>

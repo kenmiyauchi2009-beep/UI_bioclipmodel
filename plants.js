@@ -88,24 +88,18 @@ function createCard(plant, discovered, postedPhoto) {
   // 発見状態タグ（🔓/🔒）
   const state = document.createElement("span");
   state.className = "dex-state " + (discovered ? "found" : "locked");
-  state.textContent = discovered ? "🔓 発見済み" : "🔒 未発見";
+  state.textContent = discovered ? "発見済み" : "未発見";
   photo.appendChild(state);
 
   const body = document.createElement("div");
   body.className = "plant-body";
 
-  let tags = '<span class="badge ' + plant.status + '">' + plant.statusLabel + "</span>";
-  if (plant.rodRisk)    tags += ' <span class="badge rod">ROD 要観察</span>';
-  if (plant.isKeystone) tags += ' <span class="badge keystone">キーストーン種</span>';
-
+  // 規律：カード表面は「名前＋学名」だけ。説明・文化・バッジ等は
+  // クリックで開く詳細モーダルへ（プログレッシブ・ディスクロージャー）
   body.innerHTML =
-    '<div class="haw-name">' + plant.emoji + " " + plant.hawaiianName + "</div>" +
+    '<div class="haw-name">' + plant.hawaiianName + "</div>" +
     '<div class="sci-name">' + plant.scientificName + "</div>" +
-    '<div class="eng-name">English: ' + plant.englishName + "</div>" +
-    '<div class="tag-row">' + tags + "</div>" +
-    '<div class="desc">' + plant.description + "</div>" +
-    '<div class="cultural"><strong>文化・豆知識:</strong> ' + plant.culturalNote + "</div>" +
-    (discovered ? "" : '<div class="find-hint">📷 見つけて投稿すると図鑑が完成します</div>');
+    (discovered ? "" : '<div class="find-hint">見つけて投稿すると図鑑が完成します</div>');
 
   card.appendChild(photo);
   card.appendChild(body);
@@ -121,7 +115,7 @@ function createCommunityCard(sp) {
   card.className = "plant-card community";
   card.dataset.category = "community";
 
-  const photo = makePhoto(sp.photo, sp.name, "#6b7280", "🌱");
+  const photo = makePhoto(sp.photo, sp.name, "#6b7280", "");
 
   const catTag = document.createElement("span");
   catTag.className = "cat-tag community";
@@ -130,17 +124,14 @@ function createCommunityCard(sp) {
 
   const state = document.createElement("span");
   state.className = "dex-state found";
-  state.textContent = "🔓 発見 ×" + sp.count;
+  state.textContent = "発見 ×" + sp.count;
   photo.appendChild(state);
 
   const body = document.createElement("div");
   body.className = "plant-body";
   body.innerHTML =
-    '<div class="haw-name">🌱 ' + sp.name + "</div>" +
-    '<div class="sci-name">' + sp.name + "</div>" +
-    '<div class="tag-row"><span class="badge">未分類 Unverified</span></div>' +
-    '<div class="desc">コミュニティの投稿で見つかった種です。BioCLIP が判定しました。</div>' +
-    '<div class="cultural"><strong>メモ:</strong> 在来/外来の分類は今後コミュニティで確認されます。</div>';
+    '<div class="haw-name">' + sp.name + "</div>" +
+    '<div class="sci-name">未分類 Unverified</div>';
 
   card.appendChild(photo);
   card.appendChild(body);
@@ -218,10 +209,10 @@ function updateProgress(dex) {
   }
 
   dexProgress.innerHTML =
-    bar("🌿 在来 Native", nativeFound, nativeTotal, "native") +
-    bar("🔴 外来 Invasive", invasiveFound, invasiveTotal, "invasive") +
+    bar("在来 Native", nativeFound, nativeTotal, "native") +
+    bar("外来 Invasive", invasiveFound, invasiveTotal, "invasive") +
     (communityFound
-      ? '<div class="dex-community">🌱 コミュニティ発見 <strong>' + communityFound + "</strong> 種</div>"
+      ? '<div class="dex-community">コミュニティ発見 <strong>' + communityFound + "</strong> 種</div>"
       : "");
 }
 
@@ -279,8 +270,8 @@ function openCommunityDetail(sp) {
   renderDetail({
     photoSrc: sp.photo,
     color: "#6b7280",
-    emoji: "🌱",
-    name: "🌱 " + sp.name,
+    emoji: "",
+    name: sp.name,
     sci: sp.name,
     eng: "",
     badges: '<span class="badge">コミュニティ発見</span> <span class="badge">未分類 Unverified</span>',
@@ -320,7 +311,7 @@ function renderDetail(d) {
   } else {
     sightHtml =
       '<h4>目撃情報</h4>' +
-      '<div class="detail-empty">まだ目撃報告がありません。見つけて投稿しよう！📷</div>';
+      '<div class="detail-empty">まだ目撃報告がありません。見つけて投稿しよう！</div>';
   }
 
   const overlay = document.createElement("div");

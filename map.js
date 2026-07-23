@@ -83,7 +83,7 @@ function popupHtml(plant, sighting) {
     : "";
   return (
     '<div class="popup">' +
-      '<div class="popup-title">' + plant.emoji + " " + title + "</div>" +
+      '<div class="popup-title">' + title + "</div>" +
       '<div class="popup-sci">' + subtitle + aiTag + "</div>" +
       '<div style="margin:4px 0;">' + rodTag +
         '<span class="badge ' + plant.status + '">' + plant.statusLabel + "</span>" +
@@ -137,7 +137,7 @@ function renderFeed() {
 
     card.innerHTML =
       '<div class="fc-head">' +
-        '<span class="fc-emoji">' + plant.emoji + "</span>" +
+        '<span class="fc-dot" style="background:' + plant.color + '"></span>' +
         "<span>" +
           '<span class="fc-name">' + fcName + "</span><br>" +
           '<span class="fc-sci">' + fcSub + "</span>" +

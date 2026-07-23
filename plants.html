@@ -12,13 +12,18 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <!-- 図鑑ノート風の見出しフォント（セリフ体 Fraunces） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- 共通ヘッダー / ナビ -->
   <header class="site-header">
     <a class="brand" href="index.html">
-      <span class="logo">🌺</span>
+      <img class="logo" src="favicon.svg" alt="Mālama Map ロゴ" width="30" height="30" />
       <span>
         <span class="title">Mālama Map</span>
         <span class="tagline">ハワイ在来植物を守る市民マップ</span>
@@ -43,8 +48,8 @@
     <!-- フィルタ（plants.js が動かす） -->
     <div class="filters" id="filters">
       <button class="filter-btn active" data-filter="all">すべて All</button>
-      <button class="filter-btn" data-filter="discovered">🔓 見つかった</button>
-      <button class="filter-btn" data-filter="undiscovered">🔒 未発見</button>
+      <button class="filter-btn" data-filter="discovered">見つかった</button>
+      <button class="filter-btn" data-filter="undiscovered">未発見</button>
       <button class="filter-btn" data-filter="native">在来種 Native</button>
       <button class="filter-btn" data-filter="invasive">外来種 Invasive</button>
     </div>
