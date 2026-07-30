@@ -3,7 +3,21 @@
     "allow": [
       "Bash(npm run lint)",
       "Bash(npm run test:*)",
-      "Read(~/.zshrc)"
+      "Read(~/.zshrc)",
+      "Edit",
+      "Write",
+      "MultiEdit"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(git rm:*)",
+      "Bash(git clean:*)",
+      "PowerShell(Remove-Item:*)",
+      "PowerShell(rm:*)",
+      "PowerShell(del:*)",
+      "PowerShell(rmdir:*)",
+      "PowerShell(rd:*)"
     ],
     "deny": [
       "Bash(curl:*)",

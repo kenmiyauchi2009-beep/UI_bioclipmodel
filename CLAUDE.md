@@ -19,7 +19,7 @@
 | `report.html` / `report.js` | 投稿フォーム：写真撮影＋圧縮／地点選択マップ／GPS／**EXIF位置サジェスト「ここですか？」**／**BioCLIP 候補から種選択**／**「じゃじゃーん」発見演出** |
 | `data.js` | `PLANTS`（15種）＋ `SIGHTINGS`（サンプル10件）＋ localStorage 保存（`saveSighting` / `getAllSightings` / `getPlantById`） |
 | `style.css` | ハワイ自然色テーマ（深緑・火山黒・Lehua赤・砂） |
-| `../bioclip/api.py` | **BioCLIP 2.5（`imageomics/bioclip-2.5-vith14`・ViT-H/14）** の FastAPI 推論サーバー。`/classify`・CORS有効・候補は `hawaii_plants.csv`（3,191種・学名のみ）。ローカルGPU(RTX 4060)で稼働。 |
+| `../bioclip/api.py` | **BioCLIP 2.5（`imageomics/bioclip-2.5-vith14`・ViT-H/14）** の FastAPI 推論サーバー。`/classify`・CORS有効・候補は `hawaii_plants.csv`（3,191種・学名のみ）。**さくらのサーバー(さくらインターネット)で稼働**（現在 `http://163.43.183.200:8000`）。 |
 
 ### AIモデルの要点（U22説明用）
 BioCLIP 2.5 は TreeOfLife-200M（約2億枚）で学習。分類階層を丸ごと学習するため**未知の種にゼロショット汎化**する（原著 BioCLIP：CVPR 2024・arXiv:2311.18803／BioCLIP 2：arXiv:2505.23883）。→ 追加学習なしでハワイ固有種を識別できる根拠。
@@ -35,7 +35,7 @@ BioCLIP 2.5 は TreeOfLife-200M（約2億枚）で学習。分類階層を丸ご
 - **実績（レピュテーション）は「質」で**：投稿数の荒稼ぎ防止。確認された同定・高評価を重く。
 - **文化情報は先住民データ主権に配慮**（moʻolelo 等は実践者/長老の確認経路）。
 - **モバイルは別UIを作らず 1つをレスポンシブ（mobile-first）**。
-- **AIはブラウザ/ローカルGPU優先**（オフライン思想）。公開時は HTTPS化（mixed content対策）＋APIキー＋レート制限＋CORS限定が必須。
+- **AIは自前サーバー（さくらのGPUサーバー）で運用**＝クラウドAI APIに非依存・データを自分で管理（旧方針「ローカルGPU優先」から、常時稼働できるさくらのサーバーへ移行）。公開時は HTTPS化（mixed content対策）＋APIキー＋レート制限＋CORS限定が必須。
 
 ---
 
@@ -101,7 +101,7 @@ BioCLIP 2.5 は TreeOfLife-200M（約2億枚）で学習。分類階層を丸ご
 - **モデル選定（決定）**：
   - **本命＝Claude Haiku 4.5 でトリアージ**（安い $1/$5・速い・指示追従◎・構造化出力ネイティブ・出典照合に web fetch サーバーツールが使える・VRAM消費ゼロ）。
   - **難ケース（文化情報・出典照合が微妙）だけ Claude Sonnet 5 にエスカレーション**（$3/$15・高品質）。Opus 4.8 は過剰でトリアージには不要。
-  - **オフライン思想を優先するなら ローカルLLM（Llama 3.x / Qwen2.5 / Gemma の4bit量子化7〜9B）**：無料・データが外に出ない・BioCLIPと同じ「自分のPCで動くAI」で一貫。⚠️ RTX 4060 のVRAMをBioCLIP（ViT-H/14）と奪い合うため、同時起動でなく**用途で切り替え**が現実的。ハイブリッド（ローカルで一次→割れたらHaiku）でコストと思想の両取りも可。
+  - **データを外に出したくないなら 自前LLM（Llama 3.x / Qwen2.5 / Gemma の4bit量子化7〜9B）**：無料・データが自分の管理下・BioCLIPと同じ「自前サーバーで動くAI」で一貫。⚠️ さくらのGPUをBioCLIP（ViT-H/14）と共有するなら同時起動でVRAMを奪い合うため、**用途で切り替え**か別インスタンスが現実的。ハイブリッド（自前で一次→割れたらHaiku）でコストと自己管理の両取りも可。
   - 参考：Gemini Flash（非常に安い・多言語だがハワイ語の質は未知数）も候補だが別エコシステム。
 - **依存・位置づけ**：④のWiki（＝DB＋アカウント＝フェーズ2以降）が前提。今はモデル選定を決めておけば十分、実装は先。
 
@@ -238,9 +238,10 @@ BioCLIP 2.5 は TreeOfLife-200M（約2億枚）で学習。分類階層を丸ご
 
 ---
 
-## サーバー公開メモ（ドメイン購入予定）
-- ドメインは「住所」であってホスティングではない。フロント（静的）＝GitHub Pages/Netlify/Cloudflare Pages（無料・HTTPS自動）、AI API＝PCを外部公開する必要。
-- **HTTPS mixed content**：フロントがhttpsだと `http://localhost` は呼べない → AI API も HTTPS 必須。
-- 推奨：**Cloudflare Tunnel**（無料・ポート開放不要・HTTPS自動・自宅IP秘匿）で `api.ドメイン` に。
-- 公開前に必ず：**APIキー・レート制限・CORSを自ドメイン限定**（今は `*`）。PCは24時間稼働が前提。
-- U22デモだけなら公開不要（PC＋同一Wi-Fiのスマホで成立）。
+## サーバー公開メモ（AI API＝さくらのサーバー／ドメイン購入予定）
+- **AI API（BioCLIP）＝さくらのサーバー（さくらインターネット）で稼働**。現在 `http://163.43.183.200:8000`（163.43.x.x はさくらのIP帯・固定グローバルIP）。
+- ドメインは「住所」であってホスティングではない。フロント（静的）＝GitHub Pages/Netlify/Cloudflare Pages（無料・HTTPS自動）、AI API＝さくらのサーバーを外部公開。
+- **HTTPS mixed content**：フロントがhttpsだと `http://163...` は呼べない → AI API も HTTPS 必須。
+- **HTTPS化の推奨**：さくらは固定グローバルIPがあるのでトンネル不要。**独自ドメイン＋Let's Encrypt（Nginx等でリバースプロキシ）で正規HTTPS化**するのが素直。※自己署名証明書だとブラウザで `ERR_CERT_AUTHORITY_INVALID` になる。
+- 公開前に必ず：**APIキー・レート制限・CORSを自ドメイン限定**（今は `*`）。さくらのサーバーは常時稼働が前提。
+- U22デモだけなら公開不要（同一ネットワークのPC＋スマホでも成立）。

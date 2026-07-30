@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ログイン Login — Mālama Map</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 共通ヘッダー / ナビ -->
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img class="logo" src="favicon.svg" alt="Mālama Map ロゴ" width="30" height="30" />
+      <span>
+        <span class="title">Mālama Map</span>
+        <span class="tagline">ハワイ在来植物を守る市民マップ</span>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">地図<small>Map</small></a>
+      <a href="plants.html">植物図鑑<small>Plants</small></a>
+      <a href="report.html">投稿<small>Report</small></a>
+    </nav>
+  </header>
+
+  <main class="report-page">
+    <div class="page-intro">
+      <h1 id="authTitle">ログイン Login</h1>
+      <p id="authLede">投稿するにはログインが必要です。アカウントをお持ちでない場合は新規登録してください。</p>
+    </div>
+
+    <form id="authForm" class="report-form">
+      <!-- 新規登録のときだけ表示 -->
+      <div class="field" id="nameField" hidden>
+        <label class="field-label" for="nameInput">お名前 Name</label>
+        <input type="text" id="nameInput" class="text-input" placeholder="地図・図鑑に表示される名前" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="emailInput">メール Email</label>
+        <input type="email" id="emailInput" class="text-input" autocomplete="email" required />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="passwordInput">パスワード Password</label>
+        <input type="password" id="passwordInput" class="text-input" autocomplete="current-password" minlength="6" required />
+      </div>
+
+      <p id="authError" class="form-error" hidden></p>
+      <p id="authNotice" class="form-error" hidden style="color:#2d6a4f;"></p>
+
+      <button type="submit" class="submit-btn" id="authSubmit">ログイン</button>
+      <button type="button" class="ghost-btn" id="googleBtn" style="width:100%;margin-top:10px;">Google でログイン</button>
+
+      <p class="hint" style="margin-top:16px;text-align:center;">
+        <span id="toggleText">アカウントをお持ちでないですか？</span>
+        <a href="#" id="toggleMode"><strong>新規登録はこちら</strong></a>
+      </p>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    Mālama Map — フェーズ2 · アカウントで投稿を共有・保存します
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script>
+    // ?redirect= の戻り先（既定は index.html）
+    const params = new URLSearchParams(location.search);
+    const redirect = params.get("redirect") || "index.html";
+
+    let mode = "login"; // "login" | "signup"
+    const form = document.getElementById("authForm");
+    const title = document.getElementById("authTitle");
+    const lede = document.getElementById("authLede");
+    const nameField = document.getElementById("nameField");
+    const submitBtn = document.getElementById("authSubmit");
+    const toggleText = document.getElementById("toggleText");
+    const toggleMode = document.getElementById("toggleMode");
+    const errorBox = document.getElementById("authError");
+    const noticeBox = document.getElementById("authNotice");
+
+    // すでにログイン済みなら戻り先へ
+    getCurrentUser().then(function (u) { if (u) location.href = redirect; });
+
+    function setMode(next) {
+      mode = next;
+      const signup = mode === "signup";
+      title.textContent = signup ? "新規登録 Sign up" : "ログイン Login";
+      nameField.hidden = !signup;
+      submitBtn.textContent = signup ? "登録する" : "ログイン";
+      toggleText.textContent = signup ? "すでにアカウントをお持ちですか？" : "アカウントをお持ちでないですか？";
+      toggleMode.innerHTML = signup ? "<strong>ログインはこちら</strong>" : "<strong>新規登録はこちら</strong>";
+      hideMsg();
+    }
+
+    toggleMode.addEventListener("click", function (e) {
+      e.preventDefault();
+      setMode(mode === "login" ? "signup" : "login");
+    });
+
+    function showError(msg) { errorBox.textContent = msg; errorBox.hidden = false; noticeBox.hidden = true; }
+    function showNotice(msg) { noticeBox.textContent = msg; noticeBox.hidden = false; errorBox.hidden = true; }
+    function hideMsg() { errorBox.hidden = true; noticeBox.hidden = true; }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      hideMsg();
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value;
+
+      if (mode === "signup") {
+        const name = document.getElementById("nameInput").value.trim();
+        const { data, error } = await signUpWithEmail(email, password, name);
+        if (error) return showError(error.message);
+        if (data.session) {
+          location.href = redirect; // 即ログイン（メール確認オフのとき）
+        } else {
+          showNotice("確認メールを送信しました。メール内のリンクを開いてから、ログインしてください。");
+          setMode("login");
+        }
+      } else {
+        const { error } = await signInWithEmail(email, password);
+        if (error) return showError(error.message);
+        location.href = redirect;
+      }
+    });
+
+    document.getElementById("googleBtn").addEventListener("click", async function () {
+      hideMsg();
+      const { error } = await signInWithGoogle(location.origin + "/" + redirect);
+      if (error) showError(error.message);
+    });
+  </script>
+</body>
+</html>

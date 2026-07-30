@@ -1,15 +1,15 @@
 /* ============================================================
-   data.js — Mālama Map の共通データ
+   data.js — Mālama Map の共通データ / データアクセス層
    ------------------------------------------------------------
-   このファイルは index.html / plants.html の両方から読み込まれる。
-   データは2種類に分かれている：
+   このファイルは index.html / plants.html / report.html から読み込まれる。
 
-   1. PLANTS    … 植物マスター（図鑑）。種の固定情報。
-   2. SIGHTINGS … 目撃投稿。いつ・どこで・誰が見たか。
-                  plantId で PLANTS とひも付く。
+   1. PLANTS … 植物マスター（図鑑）。種の固定情報。コード同梱のまま。
+   2. 目撃投稿 … フェーズ2でバックエンド API（malamamapdb＋Supabase）へ
+                 移行。取得は loadSightings()、投稿は saveSighting()、
+                 写真は uploadPhoto()（ファイル末尾）。
 
-   ピンの色（緑＝在来 / 赤＝外来）は SIGHTINGS には持たせず、
-   plantId から PLANTS.category を引いて決める（データの二重管理を防ぐ）。
+   ピンの色（緑＝在来 / 赤＝外来）は投稿には持たせず、plantId から
+   PLANTS.category を引いて決める（データの二重管理を防ぐ）。
    ============================================================ */
 
 /* ---------- 1. 植物マスター（図鑑用・7種） ---------- */
@@ -286,132 +286,84 @@ const PLANTS = [
   }
 ];
 
-/* ---------- 2. 目撃投稿（地図ピン用・10件） ----------
-   lat/lng はハワイ各島の実在地点付近に配置している。       */
-const SIGHTINGS = [
-  {
-    id: "s001",
-    plantId: "ohia-lehua",
-    lat: 21.4145, lng: -157.7980,
-    date: "2026-05-12",
-    note: "Waikalua Loko Iʻa の遊歩道沿い。葉に黒ずみあり、ROD要観察。",
-    reporter: "APIS Student",
-    photoUrl: null
-  },
-  {
-    id: "s002",
-    plantId: "ohia-lehua",
-    lat: 19.4290, lng: -155.2570,
-    date: "2026-05-18",
-    note: "ハワイ火山国立公園。健康な大木。周囲の若木も順調。",
-    reporter: "Volunteer K.",
-    photoUrl: null
-  },
-  {
-    id: "s003",
-    plantId: "koa",
-    lat: 20.7150, lng: -156.2540,
-    date: "2026-04-29",
-    note: "Haleakalā 中腹の保全林。柵で放牧から守られているエリア。",
-    reporter: "Ranger M.",
-    photoUrl: null
-  },
-  {
-    id: "s004",
-    plantId: "olapa",
-    lat: 22.1310, lng: -159.6620,
-    date: "2026-05-02",
-    note: "Kokeʻe の湿った尾根道。葉が風で揺れていた。",
-    reporter: "Hiker A.",
-    photoUrl: null
-  },
-  {
-    id: "s005",
-    plantId: "amau",
-    lat: 19.4015, lng: -155.2840,
-    date: "2026-05-20",
-    note: "新しい溶岩流の上に赤い新芽。再生の最前線。",
-    reporter: "APIS Student",
-    photoUrl: null
-  },
-  {
-    id: "s006",
-    plantId: "loulu",
-    lat: 21.3640, lng: -157.8000,
-    date: "2026-04-15",
-    note: "Lyon Arboretum 付近で保護株を確認。野生では希少。",
-    reporter: "Botanist S.",
-    photoUrl: null
-  },
-  {
-    id: "s007",
-    plantId: "strawberry-guava",
-    lat: 21.3320, lng: -157.8010,
-    date: "2026-05-08",
-    note: "Mānoa の谷で密生。在来の若木が見当たらない。要駆除。",
-    reporter: "Volunteer T.",
-    photoUrl: null
-  },
-  {
-    id: "s008",
-    plantId: "miconia",
-    lat: 20.8990, lng: -156.4060,
-    date: "2026-05-11",
-    note: "東マウイの林道沿いで1本発見。即報告・除去依頼済み。",
-    reporter: "Ranger M.",
-    photoUrl: null
-  },
-  {
-    id: "s009",
-    plantId: "ohia-lehua",
-    lat: 21.4980, lng: -158.0150,
-    date: "2026-06-01",
-    note: "オアフ北部の尾根。今のところ ROD の兆候なし。",
-    reporter: "Hiker A.",
-    photoUrl: null
-  },
-  {
-    id: "s010",
-    plantId: "strawberry-guava",
-    lat: 22.0750, lng: -159.3210,
-    date: "2026-06-05",
-    note: "カウアイ東部の登山口付近に新たな群落。拡大中。",
-    reporter: "APIS Student",
-    photoUrl: null
-  }
-];
-
 /* ---------- 便利関数：plantId から植物マスターを引く ---------- */
 function getPlantById(id) {
   return PLANTS.find(function (p) { return p.id === id; });
 }
 
 /* ============================================================
-   ユーザー投稿の保存（フェーズ1：localStorage）
+   目撃投稿の取得・保存（フェーズ2：バックエンド API）
    ------------------------------------------------------------
-   フェーズ2で Firebase Firestore に差し替える予定の部分。
-   今はブラウザ内（localStorage）に保存するので、サーバー不要で
-   投稿が消えずに地図へ反映される。
+   旧フェーズ1は localStorage だったが、フェーズ2では
+   malamamapdb（Cloudflare Worker）＋ Supabase に置き換え。
+   ・サンプル投稿は DB にシード済み → GET /sightings で取得
+   ・投稿は POST /sightings（ログイン必須・Bearer JWT）
+   ・写真は POST /photos で Storage に上げ URL を保存
+
+   map.js / plants.js は読み込み時に何度も getAllSightings() を
+   同期呼び出しするため、契約を壊さないよう「先に loadSightings()
+   で取得 → キャッシュを同期で返す」設計にする。
    ============================================================ */
-const STORAGE_KEY = "malama_sightings";
+const API_BASE = window.MALAMA_API_BASE;
 
-// 保存済みのユーザー投稿を取り出す（壊れていたら空配列）
-function getStoredSightings() {
+let _sightings = [];   // GET /sightings の結果キャッシュ
+
+// サーバーから全投稿を取得してキャッシュする（各ページの初期化で await する）
+async function loadSightings() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const res = await fetch(API_BASE + "/sightings");
+    if (!res.ok) throw new Error("status " + res.status);
+    _sightings = await res.json();
   } catch (e) {
-    return [];
+    console.error("投稿の取得に失敗しました:", e);
+    _sightings = [];
   }
+  return _sightings;
 }
 
-// 1件追加して保存
-function saveSighting(sighting) {
-  const list = getStoredSightings();
-  list.push(sighting);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
-
-// サンプル投稿 ＋ ユーザー投稿 を合わせた全件
+// キャッシュ済みの全投稿（同期）。loadSightings() 後に使う。
 function getAllSightings() {
-  return SIGHTINGS.concat(getStoredSightings());
+  return _sightings;
+}
+
+// 1件投稿する（ログイン必須）。成功で作成された投稿を返す。
+async function saveSighting(sighting) {
+  const token = await getAccessToken();
+  if (!token) throw new Error("ログインが必要です");
+
+  const res = await fetch(API_BASE + "/sightings", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify(sighting),
+  });
+  if (!res.ok) {
+    const info = await res.json().catch(function () { return {}; });
+    throw new Error(info.error || "投稿に失敗しました（" + res.status + "）");
+  }
+  const created = await res.json();
+  _sightings.push(created);   // キャッシュにも反映
+  return created;
+}
+
+// 写真をアップロードして URL を得る（ログイン必須）。
+async function uploadPhoto(blob) {
+  const token = await getAccessToken();
+  if (!token) throw new Error("ログインが必要です");
+
+  const fd = new FormData();
+  fd.append("file", blob, "photo.jpg");
+  const res = await fetch(API_BASE + "/photos", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token },
+    body: fd,
+  });
+  if (!res.ok) {
+    const info = await res.json().catch(function () { return {}; });
+    throw new Error(info.error || "写真のアップロードに失敗しました（" + res.status + "）");
+  }
+  const data = await res.json();
+  return data.url;
 }

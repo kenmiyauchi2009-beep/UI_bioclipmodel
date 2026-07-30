@@ -5,8 +5,21 @@
    ② 地図をタップして地点を選ぶ（ドラッグ微調整・GPS対応）
    ③ 植物名を選ぶ（未確認も選べる）
    ④ メモ・報告者名
-   送信 → localStorage に保存 → ホーム地図へ
+   送信 → 写真を Storage に上げ、投稿を API に保存 → ホーム地図へ
    ============================================================ */
+
+/* ---------- ログイン必須：未ログインなら login.html へ ----------
+   投稿ページはログインしていないと使えない（フェーズ2 方針）。      */
+let currentUser = null;
+requireLogin().then(function (user) {
+  currentUser = user;   // null のときは requireLogin 内でリダイレクト済み
+  if (!user) return;
+  // ⑤報告者欄にログイン名を表示
+  const nameBox = document.getElementById("reporterName");
+  if (nameBox) nameBox.textContent = userDisplayName(user);
+  // 「新種発見」判定のため既存投稿を読み込んでおく
+  loadSightings();
+});
 
 /* ---------- ③ 植物セレクトを作る ----------
    構成：
@@ -312,7 +325,9 @@ function closeCropModal() {
      Step1 BioCLIP で予測 → Step2 ハワイ種リストと照合
      → Step3 確信度が低ければ「未確認」でコミュニティ判定へ
    ============================================================ */
-const API_BASE = "https://malama-map.com";
+// BioCLIP（AI判定）サーバーのエンドポイント。バックエンド API とは別サーバー。
+// （バックエンドの URL は data.js の API_BASE = window.MALAMA_API_BASE）
+const BIOCLIP_BASE = "https://malama-map.com";
 const aiResult = document.getElementById("aiResult");
 
 // 予測の学名（"Metrosideros polymorpha"）を PLANTS と照合
@@ -341,7 +356,7 @@ async function classifyWithBioCLIP(blob) {
     fd.append("rank", "species");
     fd.append("top_k", "5");
 
-    const res = await fetch(API_BASE + "/classify", { method: "POST", body: fd });
+    const res = await fetch(BIOCLIP_BASE + "/classify", { method: "POST", body: fd });
     if (!res.ok) throw new Error("status " + res.status);
     const data = await res.json();
     renderAiResult(data);
@@ -454,11 +469,27 @@ plantSelect.addEventListener("change", highlightSelectedRow);
 const form = document.getElementById("reportForm");
 const formError = document.getElementById("formError");
 
-form.addEventListener("submit", function (e) {
+// dataURL（"data:image/jpeg;base64,..."）を Blob に変換
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(",");
+  const mime = (parts[0].match(/:(.*?);/) || [])[1] || "image/jpeg";
+  const bin = atob(parts[1]);
+  const buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  return new Blob([buf], { type: mime });
+}
+
+const submitBtn = form.querySelector(".submit-btn");
+
+form.addEventListener("submit", async function (e) {
   e.preventDefault();
   formError.hidden = true;
 
-  // 必須チェック：地点と植物名
+  // 必須チェック：ログイン・地点・植物名
+  if (!currentUser) {
+    showError("投稿にはログインが必要です。");
+    return;
+  }
   if (!chosen) {
     showError("地点が選ばれていません。地図をタップするか「現在地を使う」を押してください。");
     return;
@@ -469,7 +500,7 @@ form.addEventListener("submit", function (e) {
   }
 
   // 選択値を解決する
-  //   "sp:<学名>" … BioCLIP 候補。図鑑7種に一致すれば plantId を付け、
+  //   "sp:<学名>" … BioCLIP 候補。図鑑種に一致すれば plantId を付け、
   //                 一致しなければ speciesName だけ保持（plantId は "unknown"）
   //   "unknown"   … 未確認
   const rawVal = plantSelect.value;
@@ -484,34 +515,45 @@ form.addEventListener("submit", function (e) {
     if (pr) aiScore = pr.score;
   }
 
-  // 投稿オブジェクトを作成（SIGHTINGS と同じ形 ＋ AI由来の付加情報）
-  const sighting = {
-    id: "u" + new Date().getTime(),       // ユーザー投稿は "u" で始まる
-    plantId: plantId,
-    speciesName: speciesName,             // BioCLIP が出した学名（あれば）
-    aiScore: aiScore,                     // その確信度（あれば）
-    lat: chosen.lat,
-    lng: chosen.lng,
-    date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
-    note: document.getElementById("noteInput").value.trim() || "（メモなし）",
-    reporter: document.getElementById("reporterInput").value.trim() || "匿名",
-    photoUrl: photoDataUrl   // 写真なしなら null
-  };
-
   // 発見判定は「保存する前」の状態で行う（この投稿で初めて見つかる種か？）
   const discoveredBefore = alreadyDiscoveredKeys();
   const dKey = discoveryKey(plantId, speciesName);
   const isNewDiscovery = dKey && !discoveredBefore.has(dKey);
 
+  // 送信中はボタンを無効化
+  submitBtn.disabled = true;
+  const originalLabel = submitBtn.textContent;
+  submitBtn.textContent = "投稿中…";
+
   try {
-    saveSighting(sighting);
+    // ① 写真があれば Storage にアップロードして URL を得る
+    let photoUrl = null;
+    if (photoDataUrl) {
+      submitBtn.textContent = "写真をアップロード中…";
+      photoUrl = await uploadPhoto(dataUrlToBlob(photoDataUrl));
+    }
+
+    // ② 投稿を作成（id / reporter / createdAt はサーバーが付与）
+    submitBtn.textContent = "投稿中…";
+    const sighting = {
+      plantId: plantId,
+      speciesName: speciesName,   // BioCLIP が出した学名（あれば）
+      aiScore: aiScore,           // その確信度（あれば）
+      lat: chosen.lat,
+      lng: chosen.lng,
+      date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+      note: document.getElementById("noteInput").value.trim() || "（メモなし）",
+      photoUrl: photoUrl,         // Storage の URL（写真なしなら null）
+    };
+    await saveSighting(sighting);
   } catch (err) {
-    // localStorage 容量オーバーなどの保険
-    showError("保存に失敗しました。写真のサイズが大きすぎる可能性があります。");
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalLabel;
+    showError(err && err.message ? err.message : "投稿に失敗しました。時間をおいて再度お試しください。");
     return;
   }
 
-  // 完了：初発見なら「じゃじゃーん」演出、そうでなければ地図へ
+  // 完了：初発見なら「じゃじゃーん」演出（ローカル写真で表示）、そうでなければ地図へ
   if (isNewDiscovery) {
     showDiscoveryPopup(plantId, speciesName, photoDataUrl, discoveredBefore);
   } else {

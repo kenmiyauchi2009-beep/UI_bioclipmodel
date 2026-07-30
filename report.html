@@ -107,15 +107,13 @@
         ></textarea>
       </div>
 
-      <!-- 5. 報告者名 -->
+      <!-- 5. 報告者名（ログインユーザー） -->
       <div class="field">
-        <label class="field-label" for="reporterInput">⑤ 報告者 Your name</label>
-        <input
-          type="text"
-          id="reporterInput"
-          class="text-input"
-          placeholder="お名前（任意）"
-        />
+        <label class="field-label">⑤ 報告者 Reporter</label>
+        <div id="reporterName" class="text-input" style="background:#f4f1ea;color:#555;">
+          ログイン確認中…
+        </div>
+        <p class="hint">ログイン中のアカウント名で投稿されます。</p>
       </div>
 
       <!-- エラー / 送信 -->
@@ -125,9 +123,13 @@
   </main>
 
   <footer class="site-footer">
-    Mālama Map — フェーズ1デモ · 投稿はこの端末内（localStorage）に保存されます
+    Mālama Map — フェーズ2 · 投稿はアカウントに紐づき、地図にすぐ共有されます
   </footer>
 
+  <!-- 設定 → supabase-js → 認証（requireLogin 用） -->
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="

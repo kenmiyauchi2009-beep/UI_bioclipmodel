@@ -361,5 +361,7 @@ function closeDetail() {
   if (existing) existing.remove();
 }
 
-/* ---------- 初期表示 ---------- */
-renderCards("all");
+/* ---------- 初期表示：投稿を取得してから描画 ---------- */
+loadSightings().then(function () {
+  renderCards("all");
+});

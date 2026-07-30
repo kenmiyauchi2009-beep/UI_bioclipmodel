@@ -2,7 +2,7 @@
    map.js — Leaflet 地図のロジック
    ------------------------------------------------------------
    1. ハワイ諸島全体を表示
-   2. SIGHTINGS をピンとして描画（緑＝在来 / 赤＝外来 / ROD は特別）
+   2. 投稿（API から取得）をピンとして描画（緑＝在来 / 赤＝外来 / ROD は特別）
    3. 最新の目撃を右サイドのフィードに表示
    ============================================================ */
 
@@ -100,15 +100,17 @@ function popupHtml(plant, sighting) {
 // sighting.id → marker の対応表（フィードからクリックで飛べるように保持）
 const markersById = {};
 
-getAllSightings().forEach(function (s) {
-  const plant = getPlantById(s.plantId) || UNKNOWN_PLANT; // 未確認は代用データ
+function drawMarkers() {
+  getAllSightings().forEach(function (s) {
+    const plant = getPlantById(s.plantId) || UNKNOWN_PLANT; // 未確認は代用データ
 
-  const marker = L.circleMarker([s.lat, s.lng], markerStyle(plant))
-    .addTo(map)
-    .bindPopup(popupHtml(plant, s));
+    const marker = L.circleMarker([s.lat, s.lng], markerStyle(plant))
+      .addTo(map)
+      .bindPopup(popupHtml(plant, s));
 
-  markersById[s.id] = marker;
-});
+    markersById[s.id] = marker;
+  });
+}
 
 /* ---------- 4. 最新の目撃フィード（右サイド） ---------- */
 function renderFeed() {
@@ -158,4 +160,8 @@ function renderFeed() {
   });
 }
 
-renderFeed();
+/* ---------- 初期化：投稿を取得してから描画 ---------- */
+loadSightings().then(function () {
+  drawMarkers();
+  renderFeed();
+});
