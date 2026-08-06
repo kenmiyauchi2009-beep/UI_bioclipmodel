@@ -134,7 +134,9 @@
 
     document.getElementById("googleBtn").addEventListener("click", async function () {
       hideMsg();
-      const { error } = await signInWithGoogle(location.origin + "/" + redirect);
+      // リダイレクト先は環境ごとに切り替わる MALAMA_SITE_URL を基準にする
+      const base = window.MALAMA_SITE_URL || location.origin;
+      const { error } = await signInWithGoogle(base + "/" + redirect);
       if (error) showError(error.message);
     });
   </script>

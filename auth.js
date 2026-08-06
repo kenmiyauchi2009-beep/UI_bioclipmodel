@@ -70,9 +70,12 @@ async function signUpWithEmail(email, password, displayName) {
 }
 
 async function signInWithGoogle(redirectTo) {
+  // リダイレクト先は config.js の MALAMA_SITE_URL（開発/本番で自動切替）を基準にする。
+  // location.origin だと開発ポート違いなどで Supabase の許可URLと不一致になりやすい。
+  var base = window.MALAMA_SITE_URL || location.origin;
   return sb.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: redirectTo || location.origin + "/index.html" },
+    options: { redirectTo: redirectTo || base + "/index.html" },
   });
 }
 
