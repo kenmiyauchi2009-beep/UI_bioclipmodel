@@ -205,23 +205,18 @@ function updateProgress(dex) {
 
   // 分母＝BioCLIP が判別できる全種（hawaii_plants.csv の種数）
   const BIOCLIP_TOTAL_SPECIES = 3191;
-
-  function bar(label, found, cls) {
-    const pct = ((found / BIOCLIP_TOTAL_SPECIES) * 100).toFixed(2); // 少数第2位まで
-    return (
-      '<div class="dex-bar-row">' +
-        '<span class="dex-bar-label">' + label + "</span>" +
-        '<span class="dex-bar-track">' +
-          '<span class="dex-bar"><span class="dex-bar-fill ' + cls + '" style="width:' + pct + '%"></span></span>' +
-          '<span class="dex-bar-pct">' + found + " / " + BIOCLIP_TOTAL_SPECIES + " ・ " + pct + "%</span>" +
-        "</span>" +
-      "</div>"
-    );
-  }
+  // 在来＋外来を合算して1本のバーにする
+  const found = nativeFound + invasiveFound;
+  const pct = ((found / BIOCLIP_TOTAL_SPECIES) * 100).toFixed(2); // 小数第2位まで
 
   dexProgress.innerHTML =
-    bar("在来 Native", nativeFound, "native") +
-    bar("外来 Invasive", invasiveFound, "invasive") +
+    '<div class="dex-bar-row">' +
+      '<span class="dex-bar-label">発見 Discovered</span>' +
+      '<span class="dex-bar-track">' +
+        '<span class="dex-bar"><span class="dex-bar-fill native" style="width:' + pct + '%"></span></span>' +
+        '<span class="dex-bar-pct">' + found + " / " + BIOCLIP_TOTAL_SPECIES + " ・ " + pct + "%</span>" +
+      "</span>" +
+    "</div>" +
     (communityFound
       ? '<div class="dex-community">コミュニティ発見 <strong>' + communityFound + "</strong> 種</div>"
       : "");
