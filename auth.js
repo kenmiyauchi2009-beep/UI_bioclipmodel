@@ -2,7 +2,7 @@
    auth.js — Supabase Auth 連携（全ページで config.js の後に読み込む）
    ------------------------------------------------------------
    ・supabase-js（UMD・グローバル `supabase`）でクライアントを生成
-   ・ログイン/サインアップ/Googleログイン/ログアウト
+   ・Google ログイン / ログアウト（メール＋パスワードは廃止）
    ・requireLogin(): 未ログインなら login.html へ退避
    ・ヘッダーのナビにログイン状態を描画
    投稿の際は getAccessToken() の JWT を Authorization: Bearer で送る。
@@ -56,19 +56,7 @@ async function requireLogin() {
   return user;
 }
 
-/* ---------- 認証アクション ---------- */
-async function signInWithEmail(email, password) {
-  return sb.auth.signInWithPassword({ email, password });
-}
-
-async function signUpWithEmail(email, password, displayName) {
-  return sb.auth.signUp({
-    email,
-    password,
-    options: { data: { full_name: displayName || email.split("@")[0] } },
-  });
-}
-
+/* ---------- 認証アクション（Google ログインのみ） ---------- */
 async function signInWithGoogle(redirectTo) {
   // リダイレクト先は config.js の MALAMA_SITE_URL（開発/本番で自動切替）を基準にする。
   // location.origin だと開発ポート違いなどで Supabase の許可URLと不一致になりやすい。
