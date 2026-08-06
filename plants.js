@@ -163,19 +163,27 @@ function renderCards(filter) {
     return rank(a.category) - rank(b.category);
   });
 
-  // 骨格種
+  // 骨格種：発見済みのものだけ表示（未発見は図鑑に出さない）
   ordered.forEach(function (plant) {
     const discovered = dex.discoveredIds.has(plant.id);
+    if (!discovered) return;  // 未発見はスキップ
     if (passFilter(filter, plant.category, discovered)) {
       grid.appendChild(createCard(plant, discovered, dex.plantPhotos[plant.id]));
     }
   });
 
-  // コミュニティ発見種（「すべて」「見つかった」でのみ表示・常に発見済み扱い）
-  if (filter === "all" || filter === "discovered") {
+  // コミュニティ発見種（未分類なので「すべて」表示のときのみ）
+  if (filter === "all") {
     Object.keys(dex.community).forEach(function (name) {
       grid.appendChild(createCommunityCard(dex.community[name]));
     });
+  }
+
+  // 1件も無ければ空状態を表示
+  if (!grid.children.length) {
+    grid.innerHTML =
+      '<p class="dex-empty">まだ発見された植物がありません。' +
+      '<a href="report.html">投稿</a>すると図鑑に追加されます。</p>';
   }
 
   updateProgress(dex);

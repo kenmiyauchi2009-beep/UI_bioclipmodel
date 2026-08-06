@@ -244,6 +244,17 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; }
   gap: 1.8rem;
 }
 
+/* 図鑑が空のとき */
+.dex-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-soft);
+  font-family: var(--serif);
+  font-size: 1rem;
+  padding: 3rem 1rem;
+}
+.dex-empty a { color: var(--lehua); font-weight: 600; }
+
 .plant-card {
   background: var(--card);
   border: 1px solid var(--rule-soft);
