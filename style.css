@@ -121,6 +121,17 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; }
 }
 .main-nav a.disabled { color: var(--text-soft); opacity: 0.5; pointer-events: none; }
 
+/* 言語トグル（JA/EN） */
+.lang-toggle { display: inline-flex; border: 1px solid var(--rule); border-radius: 5px; overflow: hidden; }
+.lang-btn {
+  font-family: var(--sans); font-size: 0.75rem; line-height: 1;
+  padding: 0.35rem 0.6rem; border: none; cursor: pointer;
+  background: transparent; color: var(--forest);
+}
+.lang-btn + .lang-btn { border-left: 1px solid var(--rule); }
+.lang-btn:hover { background: var(--paper-warm); }
+.lang-btn.active { background: var(--forest); color: var(--paper); }
+
 /* ---------- レイアウト ---------- */
 .layout {
   display: grid;
