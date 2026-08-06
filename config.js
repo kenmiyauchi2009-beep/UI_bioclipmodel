@@ -15,7 +15,7 @@
   var host = location.hostname;
   var isLocal = host === "localhost" || host === "127.0.0.1" || host === "";
   // 本番バックエンド Worker（malamamapdb）の公開 URL
-  var PROD_API_BASE = "https://web.malama-map.com";
+  var PROD_API_BASE = "https://malamamapdb.kenmiyauchi2009.workers.dev";
   window.MALAMA_API_BASE = isLocal ? "http://localhost:8787" : PROD_API_BASE;
 
   // サイト（フロント）自身の公開 URL。Google ログイン後のリダイレクト先に使う。
