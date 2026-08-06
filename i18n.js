@@ -14,12 +14,36 @@
 (function () {
   var STORE_KEY = "malama_lang";
 
+  // 対応言語（将来ここに1行足す＋各辞書にその言語コードの訳を足すだけで増やせる）
+  // 先頭が既定言語。code は辞書のキー・navigator.language の前方一致に使う。
+  var LANGUAGES = [
+    { code: "ja", label: "日本語" },
+    { code: "en", label: "English" },
+  ];
+
+  // 地球儀アイコン（インライン SVG・緯線/経線グリッド入り）
+  var GLOBE_SVG =
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7">' +
+    '<circle cx="12" cy="12" r="10"/>' +
+    '<line x1="12" y1="2" x2="12" y2="22"/>' +
+    '<line x1="2" y1="12" x2="22" y2="12"/>' +
+    '<path d="M12 2C6.5 6 6.5 18 12 22"/>' +
+    '<path d="M12 2C17.5 6 17.5 18 12 22"/>' +
+    '<path d="M3.6 8C8 6.6 16 6.6 20.4 8"/>' +
+    '<path d="M3.6 16C8 17.4 16 17.4 20.4 16"/></svg>';
+
+  function langCodes() { return LANGUAGES.map(function (l) { return l.code; }); }
+
   function detect() {
+    var codes = langCodes();
     var saved = null;
     try { saved = localStorage.getItem(STORE_KEY); } catch (e) {}
-    if (saved === "ja" || saved === "en") return saved;
-    var nav = (navigator.language || "ja").toLowerCase();
-    return nav.indexOf("ja") === 0 ? "ja" : "en";
+    if (saved && codes.indexOf(saved) !== -1) return saved;
+    var nav = (navigator.language || "").toLowerCase();
+    for (var i = 0; i < codes.length; i++) {
+      if (nav.indexOf(codes[i]) === 0) return codes[i];
+    }
+    return codes[0]; // 既定（先頭）
   }
 
   window.LANG = detect();
@@ -194,7 +218,7 @@
 
   /* ---------- 言語切替（記憶して再読込） ---------- */
   window.setLang = function (lang) {
-    if (lang !== "ja" && lang !== "en") return;
+    if (langCodes().indexOf(lang) === -1) return;
     try { localStorage.setItem(STORE_KEY, lang); } catch (e) {}
     location.reload();
   };
@@ -212,24 +236,48 @@
     });
   }
 
-  /* ---------- ヘッダーに JA/EN トグルを挿入 ---------- */
-  function injectToggle() {
+  /* ---------- ヘッダーに地球儀＋言語メニューを挿入 ---------- */
+  function injectSwitch() {
     var header = document.querySelector(".site-header");
-    if (!header || document.querySelector(".lang-toggle")) return;
+    if (!header || document.querySelector(".lang-switch")) return;
+
     var wrap = document.createElement("div");
-    wrap.className = "lang-toggle";
-    ["ja", "en"].forEach(function (l) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.textContent = l === "ja" ? "日本語" : "EN";
-      b.className = "lang-btn" + (window.LANG === l ? " active" : "");
-      b.addEventListener("click", function () { window.setLang(l); });
-      wrap.appendChild(b);
+    wrap.className = "lang-switch";
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "lang-globe";
+    btn.setAttribute("aria-label", "言語を選ぶ / Choose language");
+    btn.setAttribute("aria-haspopup", "true");
+    btn.innerHTML = GLOBE_SVG + '<span class="lang-caret" aria-hidden="true">▾</span>';
+
+    var menu = document.createElement("div");
+    menu.className = "lang-menu";
+    menu.hidden = true;
+
+    LANGUAGES.forEach(function (lng) {
+      var item = document.createElement("button");
+      item.type = "button";
+      item.className = "lang-item" + (window.LANG === lng.code ? " active" : "");
+      item.textContent = lng.label;
+      item.addEventListener("click", function () { window.setLang(lng.code); });
+      menu.appendChild(item);
     });
+
+    // 地球儀クリックで開閉／外側クリックで閉じる
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+      btn.setAttribute("aria-expanded", String(!menu.hidden));
+    });
+    document.addEventListener("click", function () { menu.hidden = true; });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
     header.appendChild(wrap);
   }
 
-  function run() { applyStatic(); injectToggle(); }
+  function run() { applyStatic(); injectSwitch(); }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", run);
   } else {
